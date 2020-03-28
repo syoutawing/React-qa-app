@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { render } from 'react-dom';
 
 class Questions extends Component {
   constructor(props) {
@@ -14,7 +13,7 @@ class Questions extends Component {
 
   async componentDidMount() {
     const questions = (await axios.get('http://localhost:8081/')).data;
-    this.ListeningStateChangedEvent({
+    this.setState({
       questions
     });
   }
@@ -45,3 +44,5 @@ class Questions extends Component {
     );
   }
 }
+
+export default Questions;
