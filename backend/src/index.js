@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const jwk = require('express-jwt');
+const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 
 // define the Express app
@@ -27,18 +27,18 @@ app.use(morgan('combined'));
 
 // retrieve all questions
 app.get('/', (req, res) => {
-  const qs = questions.map(q => ({
+  const qs = questions.map((q) => ({
     id: q.id,
     title: q.title,
     description: q.description,
-    answers: q.answers.length
+    answers: q.answers.length,
   }));
   res.send(qs);
 });
 
 // get a specific question
 app.get('/:id', (req, res) => {
-  const question = questions.filter(q => q.id === parseInt(req.params.id));
+  const question = questions.filter((q) => q.id === parseInt(req.params.id));
   if (question.length > 1) return res.status(500).send();
   if (question.length === 0) return res.status(404).send();
   res.send(question[0]);
@@ -49,13 +49,13 @@ const checkJwt = jwt({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `https://dev-y-ztd0q0.auth0.com/.well-known/jwks.json`
+    jwksUri: `https://dev-y-ztd0q0.auth0.com/.well-known/jwks.json`,
   }),
 
   // Validate the audience and the issuer.
   audience: 'ZH6xyH55EMZEr4IHDojtStZ9cpsDVoMh',
   issuer: `https://dev-y-ztd0q0.auth0.com/`,
-  algorithms: ['RS256']
+  algorithms: ['RS256'],
 });
 
 // insert a new question
@@ -66,7 +66,7 @@ app.post('/', checkJwt, (req, res) => {
     title,
     description,
     answers: [],
-    author: req.user.name
+    author: req.user.name,
   };
   questions.push(newQuestion);
   res.status(200).send();
@@ -76,13 +76,13 @@ app.post('/', checkJwt, (req, res) => {
 app.post('/answer/:id', checkJwt, (req, res) => {
   const { answer } = req.body;
 
-  const question = questions.filter(q => q.id === parseInt(req.params.id));
+  const question = questions.filter((q) => q.id === parseInt(req.params.id));
   if (question.length > 1) return res.status(500).send();
   if (question.length === 0) return res.status(404).send();
 
   question[0].answers.push({
     answer,
-    author: req.user.name
+    author: req.user.name,
   });
 
   res.status(200).send();

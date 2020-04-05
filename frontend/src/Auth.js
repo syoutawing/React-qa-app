@@ -9,7 +9,7 @@ class Auth {
       clientID: 'ZH6xyH55EMZEr4IHDojtStZ9cpsDVoMh',
       redirectUri: 'http://localhost:3000/callback',
       responseType: 'id_token',
-      scope: 'openid profile'
+      scope: 'openid profile',
     });
 
     this.getProfile = this.getProfile.bind(this);
@@ -42,20 +42,34 @@ class Auth {
         if (!authResult || !authResult.idToken) {
           return reject(err);
         }
-        this.idToken = authResult.idToken;
-        this.profile = authResult.idTokenPayload;
-        // set the time that the id token will expire at
-        this.expiresAt = authResult.idTokenPayload.exp * 1000;
+        this.setSession(authResult);
         resolve();
       });
     });
   }
 
+  setSession(authResult) {
+    this.idToken = authResult.idToken;
+    this.profile = authResult.idTokenPayload;
+    // set the time that the id token will expire at
+    this.expiresAt = authResult.idTokenPayload.exp * 1000;
+  }
+
   signOut() {
-    // clear id token, profile, and expiration
-    this.idToken = null;
-    this.profile = null;
-    this.expiresAt = null;
+    this.auth0.logout({
+      returnTo: 'http://localhost:3000',
+      clientID: 'ZH6xyH55EMZEr4IHDojtStZ9cpsDVoMh',
+    });
+  }
+
+  silentAuth() {
+    return new Promise((resolve, reject) => {
+      this.auth0.checkSession({}, (err, authResult) => {
+        if (err) return reject(err);
+        this.setSession(authResult);
+        resolve();
+      });
+    });
   }
 }
 
